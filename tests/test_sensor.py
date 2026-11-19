@@ -102,3 +102,41 @@ def test_effective_rate_math() -> None:
     assert effective_rate(4.0, "sellRate", 0.2) < 4.0
     # 1000 PLN buys 1000/4.0*0.998 EUR -> effective price 4.0/0.998
     assert effective_rate(4.0, "buyRate", 0.2) == pytest.approx(4.0 / 0.998)
+
+
+@pytest.mark.asyncio
+async def test_commission_number_updates_rates(hass: HomeAssistant) -> None:
+    """Changing the commission number entity recalculates effective rates."""
+    config_entry = MockConfigEntry(
+        domain=DOMAIN,
+        data={},
+        options={CONF_CURRENCY_PAIRS: ["EUR_PLN"]},
+        entry_id="test-number",
+    )
+    with patch(
+        "walutomat_py.WalutomatClient.get_public_rate",
+        return_value={"buyRate": "4.0000", "sellRate": "3.9000"},
+    ):
+        config_entry.add_to_hass(hass)
+        assert await hass.config_entries.async_setup(config_entry.entry_id)
+        await hass.async_block_till_done()
+
+        number = hass.states.get("number.walutomat_commission")
+        assert number is not None
+        assert float(number.state) == 0.2
+        assert number.attributes["unit_of_measurement"] == "%"
+
+        await hass.services.async_call(
+            "number",
+            "set_value",
+            {"entity_id": "number.walutomat_commission", "value": 0.5},
+            blocking=True,
+        )
+        await hass.async_block_till_done()
+
+    assert float(hass.states.get("number.walutomat_commission").state) == 0.5
+    buy = hass.states.get("sensor.walutomat_eur_pln_buy_rate_with_commission")
+    sell = hass.states.get("sensor.walutomat_eur_pln_sell_rate_with_commission")
+    assert float(buy.state) == pytest.approx(4.0 / 0.995, abs=1e-6)
+    assert float(sell.state) == pytest.approx(3.9 * 0.995, abs=1e-6)
+    assert buy.attributes["commission_percent"] == 0.5

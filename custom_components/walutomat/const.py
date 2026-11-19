@@ -15,6 +15,9 @@ DEFAULT_RATES_UPDATE_INTERVAL = 1  # in minutes
 # Exchange commission (percent) used for "effective" rate sensors
 CONF_COMMISSION = "commission"
 DEFAULT_COMMISSION = 0.2  # Walutomat base commission, in percent
+# hass.data key holding the current commission and the signal sent when it changes
+DATA_COMMISSION = "commission"
+SIGNAL_COMMISSION_UPDATED = f"{DOMAIN}_commission_updated"
 
 # Currency Pairs
 CONF_CURRENCY_PAIRS = "currency_pairs"

@@ -13,11 +13,9 @@ from .const import (
     AVAILABLE_CURRENCY_PAIRS,
     CONF_API_KEY,
     CONF_BALANCES_UPDATE_INTERVAL,
-    CONF_COMMISSION,
     CONF_CURRENCY_PAIRS,
     CONF_RATES_UPDATE_INTERVAL,
     DEFAULT_BALANCES_UPDATE_INTERVAL,
-    DEFAULT_COMMISSION,
     DEFAULT_CURRENCY_PAIRS,
     DEFAULT_RATES_UPDATE_INTERVAL,
     DOMAIN,
@@ -128,9 +126,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         currency_pairs = self.config_entry.options.get(
             CONF_CURRENCY_PAIRS, DEFAULT_CURRENCY_PAIRS
         )
-        commission = self.config_entry.options.get(
-            CONF_COMMISSION, DEFAULT_COMMISSION
-        )
 
         options_schema = {
             vol.Required(
@@ -143,17 +138,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     options=AVAILABLE_CURRENCY_PAIRS,
                     multiple=True,
                     sort=True,
-                )
-            ),
-            vol.Required(
-                CONF_COMMISSION, default=commission
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=0,
-                    max=5,
-                    step=0.01,
-                    unit_of_measurement="%",
-                    mode=selector.NumberSelectorMode.BOX,
                 )
             ),
         }
