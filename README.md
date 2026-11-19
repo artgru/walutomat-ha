@@ -55,6 +55,7 @@ You can customize the integration's behavior after the initial setup.
     -   **Select Currency Pairs:** Choose which exchange rate sensors to create (e.g., `EUR_PLN`, `USD_PLN`). The integration will create separate "buy" and "sell" sensors for each selected pair.
     -   **Set Rates Update Interval:** Define how often (in minutes) the exchange rates should be updated. The default is 1 minute.
     -   **Set Balances Update Interval:** If you configured an API key, you can define how often your account balances should be polled. The default is 5 minutes.
+    -   **Set Exchange Commission (%):** The commission used for the "with commission" rate sensors. The default is 0.2% (Walutomat's base rate). For each pair the integration creates *Buy Rate (with commission)* = buy rate / (1 − commission) and *Sell Rate (with commission)* = sell rate × (1 − commission), i.e. the rate you actually get after the fee.
 4.  Click **"Submit"** to apply the changes. The integration will reload automatically.
 
 ***
@@ -114,4 +115,5 @@ Możesz dostosować zachowanie integracji po początkowej konfiguracji.
     -   **Wybierz pary walutowe:** Wybierz, które sensory kursów walut utworzyć (np. `EUR_PLN`, `USD_PLN`). Integracja utworzy osobne sensory "kupna" i "sprzedaży" dla każdej wybranej pary.
     -   **Ustaw interwał aktualizacji kursów:** Określ, jak często (w minutach) kursy walut powinny być aktualizowane. Domyślna wartość to 1 minuta.
     -   **Ustaw interwał aktualizacji sald:** Jeśli skonfigurowałeś klucz API, możesz określić, jak często Twoje salda konta powinny być odpytywane. Domyślna wartość to 5 minut.
+    -   **Ustaw prowizję od wymiany (%):** Prowizja używana przez sensory kursów "z prowizją". Domyślnie 0,2% (podstawowa stawka Walutomatu). Dla każdej pary integracja tworzy *Kurs kupna z prowizją* = kurs kupna / (1 − prowizja) oraz *Kurs sprzedaży z prowizją* = kurs sprzedaży × (1 − prowizja), czyli kurs faktycznie uzyskany po potrąceniu opłaty.
 4.  Kliknij **"Zatwierdź"**, aby zastosować zmiany. Integracja przeładuje się automatycznie.

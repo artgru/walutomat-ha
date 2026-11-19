@@ -12,6 +12,10 @@ CONF_RATES_UPDATE_INTERVAL = "rates_update_interval"
 DEFAULT_BALANCES_UPDATE_INTERVAL = 5  # in minutes
 DEFAULT_RATES_UPDATE_INTERVAL = 1  # in minutes
 
+# Exchange commission (percent) used for "effective" rate sensors
+CONF_COMMISSION = "commission"
+DEFAULT_COMMISSION = 0.2  # Walutomat base commission, in percent
+
 # Currency Pairs
 CONF_CURRENCY_PAIRS = "currency_pairs"
 DEFAULT_CURRENCY_PAIRS = ["EUR_PLN", "USD_PLN", "CHF_PLN", "GBP_PLN"]

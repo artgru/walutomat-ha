@@ -15,7 +15,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN
+from .const import CONF_COMMISSION, DEFAULT_COMMISSION, DOMAIN
 from .coordinator import WalutomatBalancesCoordinator, WalutomatRatesCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -55,6 +55,22 @@ async def async_setup_entry(
                 rate_sensors.append(
                     WalutomatRateSensor(
                         rates_coordinator, pair, "sellRate", "Sell Rate"
+                    )
+                )
+                rate_sensors.append(
+                    WalutomatEffectiveRateSensor(
+                        rates_coordinator,
+                        pair,
+                        "buyRate",
+                        "Buy Rate (with commission)",
+                    )
+                )
+                rate_sensors.append(
+                    WalutomatEffectiveRateSensor(
+                        rates_coordinator,
+                        pair,
+                        "sellRate",
+                        "Sell Rate (with commission)",
                     )
                 )
             entities.extend(rate_sensors)
@@ -158,3 +174,64 @@ class WalutomatRateSensor(CoordinatorEntity[WalutomatRatesCoordinator], SensorEn
         if self.pair in self.coordinator.data:
             return self.coordinator.data[self.pair]
         return None
+
+
+def effective_rate(rate: float, rate_type: str, commission_percent: float) -> float:
+    """Return the rate after Walutomat's commission is deducted.
+
+    Walutomat deducts its commission from the amount of currency bought
+    (boughtAmount - commissionAmount lands in the wallet), so:
+    - buying the base currency at ``rate``: you receive (1 - c) units per
+      ``rate`` paid, i.e. an effective price of ``rate / (1 - c)``;
+    - selling the base currency at ``rate``: you receive ``rate * (1 - c)``.
+    """
+    c = commission_percent / 100
+    if rate_type == "buyRate":
+        return rate / (1 - c)
+    return rate * (1 - c)
+
+
+class WalutomatEffectiveRateSensor(WalutomatRateSensor):
+    """Exchange rate including the configured Walutomat commission."""
+
+    _attr_icon = "mdi:cash-minus"
+    _attr_suggested_display_precision = 4
+
+    def __init__(
+        self,
+        coordinator: WalutomatRatesCoordinator,
+        pair: str,
+        rate_type: str,
+        rate_name: str,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator, pair, rate_type, rate_name)
+        self._attr_unique_id = f"walutomat_public_{pair}_{rate_type}_with_commission"
+
+    @property
+    def commission(self) -> float:
+        """Return the configured commission in percent."""
+        return float(
+            self.coordinator.entry.options.get(CONF_COMMISSION, DEFAULT_COMMISSION)
+        )
+
+    @property
+    def native_value(self) -> float | None:
+        """Return the rate after commission."""
+        rate = super().native_value
+        if rate is None:
+            return None
+        try:
+            return round(effective_rate(float(rate), self.rate_type, self.commission), 6)
+        except (TypeError, ValueError, ZeroDivisionError):
+            return None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any] | None:
+        """Return the state attributes."""
+        if self.pair not in self.coordinator.data:
+            return None
+        return {
+            "market_rate": self.coordinator.data[self.pair][self.rate_type],
+            "commission_percent": self.commission,
+        }
