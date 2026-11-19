@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   release:
@@ -14,11 +15,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Get version
-        id: get_version
-        run: echo "VERSION=v0.0.$(date +'%Y%m%d-%H%M')" >> $GITHUB_ENV
+      - name: Get version from manifest.json
+        run: |
+          VERSION="v$(jq -r .version custom_components/walutomat/manifest.json)"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          if git ls-remote --exit-code --tags origin "refs/tags/$VERSION" > /dev/null; then
+            echo "Release $VERSION already exists - bump \"version\" in manifest.json to publish a new one."
+            echo "EXISTS=true" >> "$GITHUB_ENV"
+          else
+            echo "EXISTS=false" >> "$GITHUB_ENV"
+          fi
 
       - name: Create ZIP artifact
+        if: env.EXISTS == 'false'
         run: |
           mkdir -p artifact
           cd custom_components/walutomat
@@ -26,10 +35,12 @@ jobs:
           cd ../..
 
       - name: Create Release and Upload Asset
+        if: env.EXISTS == 'false'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.VERSION }}
-          name: "Release ${{ env.VERSION }}"
+          name: ${{ env.VERSION }}
+          generate_release_notes: true
           files: "artifact/walutomat.zip"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
