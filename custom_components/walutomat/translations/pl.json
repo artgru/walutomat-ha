@@ -22,12 +22,10 @@
         "step": {
             "init": {
                 "title": "Opcje Walutomat",
-                "description": "Prowizja służy do wyliczenia sensorów kursu \"z prowizją\", czyli kursu, który faktycznie uzyskasz po potrąceniu opłaty Walutomatu. Domyślnie: 0,2%.",
                 "data": {
                     "rates_update_interval": "Interwał aktualizacji kursów wymiany (minuty)",
                     "balances_update_interval": "Interwał aktualizacji sald (minuty)",
-                    "currency_pairs": "Pary walut dla sensorów kursów wymiany",
-                    "commission": "Prowizja od wymiany (%) do kursów z prowizją"
+                    "currency_pairs": "Pary walut dla sensorów kursów wymiany"
                 }
             }
         }

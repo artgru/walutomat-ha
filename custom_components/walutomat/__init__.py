@@ -8,17 +8,25 @@ from homeassistant.const import CONF_API_KEY, Platform
 from homeassistant.core import HomeAssistant
 from walutomat_py import WalutomatClient
 
-from .const import DOMAIN
+from .const import CONF_COMMISSION, DATA_COMMISSION, DEFAULT_COMMISSION, DOMAIN
 from .coordinator import WalutomatBalancesCoordinator, WalutomatRatesCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[Platform] = [Platform.SENSOR]
+PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.NUMBER]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Walutomat from a config entry."""
     hass.data.setdefault(DOMAIN, {})
+
+    # Commission used by the "with commission" rate sensors. It is edited via the
+    # number entity (restored after restart); the old options value, if any,
+    # is only used as the initial value.
+    hass.data[DOMAIN].setdefault(
+        DATA_COMMISSION,
+        float(entry.options.get(CONF_COMMISSION, DEFAULT_COMMISSION)),
+    )
 
     # Create and store the rates coordinator if it doesn't exist (singleton)
     if "rates_coordinator" not in hass.data[DOMAIN]:
@@ -63,6 +71,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 hass.data[DOMAIN].pop("rates_coordinator")
             if "rate_sensors_created" in hass.data[DOMAIN]:
                 hass.data[DOMAIN].pop("rate_sensors_created")
+            hass.data[DOMAIN].pop("commission_number_created", None)
 
     return unload_ok
 

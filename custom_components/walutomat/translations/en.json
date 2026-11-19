@@ -22,12 +22,10 @@
         "step": {
             "init": {
                 "title": "Walutomat Options",
-                "description": "The commission is used to calculate the \"with commission\" rate sensors, i.e. the rate you actually get after Walutomat deducts its fee. Default: 0.2%.",
                 "data": {
                     "rates_update_interval": "Exchange rates update interval (minutes)",
                     "balances_update_interval": "Balances update interval (minutes)",
-                    "currency_pairs": "Currency pairs for exchange rate sensors",
-                    "commission": "Exchange commission (%) used for effective rate sensors"
+                    "currency_pairs": "Currency pairs for exchange rate sensors"
                 }
             }
         }

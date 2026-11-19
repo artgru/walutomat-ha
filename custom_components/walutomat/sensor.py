@@ -12,10 +12,16 @@ from homeassistant.components.sensor import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import CONF_COMMISSION, DEFAULT_COMMISSION, DOMAIN
+from .const import (
+    DATA_COMMISSION,
+    DEFAULT_COMMISSION,
+    DOMAIN,
+    SIGNAL_COMMISSION_UPDATED,
+)
 from .coordinator import WalutomatBalancesCoordinator, WalutomatRatesCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -208,11 +214,20 @@ class WalutomatEffectiveRateSensor(WalutomatRateSensor):
         super().__init__(coordinator, pair, rate_type, rate_name)
         self._attr_unique_id = f"walutomat_public_{pair}_{rate_type}_with_commission"
 
+    async def async_added_to_hass(self) -> None:
+        """Recalculate when the commission number entity changes."""
+        await super().async_added_to_hass()
+        self.async_on_remove(
+            async_dispatcher_connect(
+                self.hass, SIGNAL_COMMISSION_UPDATED, self.async_write_ha_state
+            )
+        )
+
     @property
     def commission(self) -> float:
-        """Return the configured commission in percent."""
+        """Return the current commission in percent."""
         return float(
-            self.coordinator.entry.options.get(CONF_COMMISSION, DEFAULT_COMMISSION)
+            self.hass.data.get(DOMAIN, {}).get(DATA_COMMISSION, DEFAULT_COMMISSION)
         )
 
     @property

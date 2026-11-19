@@ -91,7 +91,6 @@ async def test_options_flow(hass: HomeAssistant) -> None:
 
     from custom_components.walutomat.const import (
         CONF_BALANCES_UPDATE_INTERVAL,
-        CONF_COMMISSION,
         CONF_CURRENCY_PAIRS,
         CONF_RATES_UPDATE_INTERVAL,
     )
@@ -110,7 +109,6 @@ async def test_options_flow(hass: HomeAssistant) -> None:
         CONF_RATES_UPDATE_INTERVAL: 2,
         CONF_BALANCES_UPDATE_INTERVAL: 10,
         CONF_CURRENCY_PAIRS: ["EUR_PLN", "USD_PLN"],
-        CONF_COMMISSION: 0.15,
     }
     result2 = await hass.config_entries.options.async_configure(
         result["flow_id"], user_input
