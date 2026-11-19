@@ -7,5 +7,5 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/artgru/walutomat-ha/issues",
   "requirements": ["walutomat-py==0.0.20251110.201342"],
-  "version": "0.1.2"
+  "version": "0.1.3"
 }
