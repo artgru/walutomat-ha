@@ -1,25 +1,25 @@
 """Config flow for Walutomat integration."""
 import logging
-from typing import Any, Dict
+from typing import Any
 
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
+from homeassistant.helpers import selector
 from walutomat_py import WalutomatAPIError, WalutomatClient
 
 from .const import (
+    AVAILABLE_CURRENCY_PAIRS,
     CONF_API_KEY,
     CONF_BALANCES_UPDATE_INTERVAL,
+    CONF_CURRENCY_PAIRS,
     CONF_RATES_UPDATE_INTERVAL,
     DEFAULT_BALANCES_UPDATE_INTERVAL,
+    DEFAULT_CURRENCY_PAIRS,
     DEFAULT_RATES_UPDATE_INTERVAL,
     DOMAIN,
-    AVAILABLE_CURRENCY_PAIRS,
-    DEFAULT_CURRENCY_PAIRS,
-    CONF_CURRENCY_PAIRS,
 )
-from homeassistant.helpers import selector
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class WalutomatConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         config_entry: config_entries.ConfigEntry,
     ) -> config_entries.OptionsFlow:
         """Get the options flow for this handler."""
-        return OptionsFlowHandler(config_entry)
+        return OptionsFlowHandler()
 
     async def _validate_api_key(self, api_key: str, sandbox: bool) -> None:
         """Validate the API key by trying to connect to Walutomat."""
@@ -48,10 +48,10 @@ class WalutomatConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         await self.hass.async_add_executor_job(client.get_balances)
 
     async def async_step_user(
-        self, user_input: Dict[str, Any] | None = None
+        self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Handle the initial step."""
-        errors: Dict[str, str] = {}
+        errors: dict[str, str] = {}
         if user_input is not None:
             # Use a unique ID based on the API key to prevent duplicate entries
             # If API key is empty, create a single entry for public rates.
@@ -103,14 +103,14 @@ class WalutomatConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 
 class OptionsFlowHandler(config_entries.OptionsFlow):
-    """Handle an options flow for Walutomat."""
+    """Handle an options flow for Walutomat.
 
-    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
-        """Initialize options flow."""
-        self.config_entry = config_entry
+    Home Assistant sets ``self.config_entry`` itself; assigning it manually
+    raises AttributeError on HA 2025.12+ (HTTP 500 when opening options).
+    """
 
     async def async_step_init(
-        self, user_input: Dict[str, Any] | None = None
+        self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Manage the options."""
         if user_input is not None:

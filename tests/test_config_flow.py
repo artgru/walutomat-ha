@@ -82,3 +82,36 @@ async def test_form_unknown_exception(hass: HomeAssistant) -> None:
 
     assert result2["type"] == data_entry_flow.FlowResultType.FORM
     assert result2["errors"] == {"base": "unknown"}
+
+
+@pytest.mark.asyncio
+async def test_options_flow(hass: HomeAssistant) -> None:
+    """Test the options flow opens and saves (regression: HTTP 500 on HA 2025.12+)."""
+    from pytest_homeassistant_custom_component.common import MockConfigEntry
+
+    from custom_components.walutomat.const import (
+        CONF_BALANCES_UPDATE_INTERVAL,
+        CONF_CURRENCY_PAIRS,
+        CONF_RATES_UPDATE_INTERVAL,
+    )
+
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data={CONF_API_KEY: "test-api-key", "sandbox": False},
+    )
+    entry.add_to_hass(hass)
+
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    assert result["type"] == data_entry_flow.FlowResultType.FORM
+    assert result["step_id"] == "init"
+
+    user_input = {
+        CONF_RATES_UPDATE_INTERVAL: 2,
+        CONF_BALANCES_UPDATE_INTERVAL: 10,
+        CONF_CURRENCY_PAIRS: ["EUR_PLN", "USD_PLN"],
+    }
+    result2 = await hass.config_entries.options.async_configure(
+        result["flow_id"], user_input
+    )
+    assert result2["type"] == data_entry_flow.FlowResultType.CREATE_ENTRY
+    assert entry.options == user_input
