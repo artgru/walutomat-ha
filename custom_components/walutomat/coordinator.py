@@ -2,7 +2,7 @@
 import asyncio
 import logging
 from datetime import timedelta
-from typing import Any, Dict, List
+from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -22,7 +22,7 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-class WalutomatBalancesCoordinator(DataUpdateCoordinator[List[Dict[str, Any]]]):
+class WalutomatBalancesCoordinator(DataUpdateCoordinator[list[dict[str, Any]]]):
     """Class to manage fetching Walutomat balances data."""
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry, client: WalutomatClient):
@@ -41,7 +41,7 @@ class WalutomatBalancesCoordinator(DataUpdateCoordinator[List[Dict[str, Any]]]):
             update_interval=update_interval,
         )
 
-    async def _async_update_data(self) -> List[Dict[str, Any]]:
+    async def _async_update_data(self) -> list[dict[str, Any]]:
         """Fetch data from API endpoint."""
         try:
             balances = await self.hass.async_add_executor_job(self.client.get_balances)
@@ -50,11 +50,11 @@ class WalutomatBalancesCoordinator(DataUpdateCoordinator[List[Dict[str, Any]]]):
         except WalutomatAPIError as err:
             raise UpdateFailed(f"Error communicating with API for balances: {err}") from err
         except Exception as err:
-            _LOGGER.error("Unexpected error fetching walutomat_balances data", exc_info=True)
+            _LOGGER.exception("Unexpected error fetching walutomat_balances data")
             raise UpdateFailed(f"Unexpected error fetching walutomat_balances data: {err}") from err
 
 
-class WalutomatRatesCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
+class WalutomatRatesCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     """Class to manage fetching Walutomat public rates data."""
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry):
@@ -73,7 +73,7 @@ class WalutomatRatesCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
             update_interval=update_interval,
         )
 
-    async def _async_update_data(self) -> Dict[str, Any]:
+    async def _async_update_data(self) -> dict[str, Any]:
         """Fetch data from public API endpoint."""
         selected_pairs = self.entry.options.get(
             CONF_CURRENCY_PAIRS, DEFAULT_CURRENCY_PAIRS

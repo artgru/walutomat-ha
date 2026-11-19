@@ -6,7 +6,7 @@ from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.walutomat.const import DOMAIN, CONF_CURRENCY_PAIRS
+from custom_components.walutomat.const import CONF_CURRENCY_PAIRS, DOMAIN
 
 
 @pytest.mark.asyncio

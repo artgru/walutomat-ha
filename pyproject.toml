@@ -1,6 +1,6 @@
 [project]
 name = "walutomat-ha"
-version = "0.1.1"
+version = "0.1.2"
 
 [tool.pytest.ini_options]
 addopts = "--cov=custom_components.walutomat --cov-report=term-missing"

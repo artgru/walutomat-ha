@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -110,7 +110,7 @@ class WalutomatBalanceSensor(CoordinatorEntity[WalutomatBalancesCoordinator], Se
         return self.coordinator.data[self._idx]["balanceAvailable"]
 
     @property
-    def extra_state_attributes(self) -> Dict[str, Any]:
+    def extra_state_attributes(self) -> dict[str, Any]:
         """Return the state attributes."""
         return self.coordinator.data[self._idx]
 
@@ -153,7 +153,7 @@ class WalutomatRateSensor(CoordinatorEntity[WalutomatRatesCoordinator], SensorEn
         return None
 
     @property
-    def extra_state_attributes(self) -> Dict[str, Any] | None:
+    def extra_state_attributes(self) -> dict[str, Any] | None:
         """Return the state attributes."""
         if self.pair in self.coordinator.data:
             return self.coordinator.data[self.pair]
